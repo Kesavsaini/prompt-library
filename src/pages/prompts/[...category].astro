@@ -1,14 +1,16 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
-import PromptCard from '../../components/PromptCard.astro';
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import PromptCard from "../../components/PromptCard.astro";
 
 export async function getStaticPaths() {
-	const prompts = await getCollection('prompts');
+	const prompts = await getCollection("prompts");
 	const uniqueCategories = [...new Set(prompts.map((p) => p.data.category))];
 
 	return uniqueCategories.map((category) => {
-		const filteredPrompts = prompts.filter((p) => p.data.category === category);
+		const filteredPrompts = prompts.filter(
+			(p) => p.data.category === category,
+		);
 		return {
 			params: { category: category.toLowerCase() },
 			props: { category, prompts: filteredPrompts },
@@ -17,14 +19,17 @@ export async function getStaticPaths() {
 }
 
 const { category, prompts } = Astro.props;
-const allPrompts = await getCollection('prompts');
+const allPrompts = await getCollection("prompts");
 const allCategories = [...new Set(allPrompts.map((p) => p.data.category))];
 
 // Sort by date descending
 prompts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<Layout title={`${category} Prompts`} description={`Browse our collection of ${category} prompts.`}>
+<Layout
+	title={`${category} Prompts`}
+	description={`Browse our collection of ${category} prompts.`}
+>
 	<div class="mb-12 text-center">
 		<h1 class="text-4xl md:text-5xl font-bold mb-4">{category} Prompts</h1>
 		<p class="text-xl text-slate-400 max-w-2xl mx-auto">
@@ -32,27 +37,30 @@ prompts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 		</p>
 	</div>
 
-    <div class="flex justify-center flex-wrap gap-4 mb-12">
-        <a href="/prompts" class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-medium text-sm border border-slate-700 hover:bg-slate-700 transition-colors">
-            All
-        </a>
-        {allCategories.map(cat => (
-            <a 
-                href={`/prompts/${cat.toLowerCase()}`} 
-                class={`px-4 py-2 rounded-full font-medium text-sm border transition-colors ${
-                    cat === category 
-                    ? 'bg-brand-primary text-white border-brand-primary' 
-                    : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
-                }`}
-            >
-                {cat}
-            </a>
-        ))}
-    </div>
+	<div class="flex justify-center flex-wrap gap-4 mb-12">
+		<a
+			href="/prompt-library/prompts"
+			class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-medium text-sm border border-slate-700 hover:bg-slate-700 transition-colors"
+		>
+			All
+		</a>
+		{
+			allCategories.map((cat) => (
+				<a
+					href={`/prompt-library/prompts/${cat.toLowerCase()}`}
+					class={`px-4 py-2 rounded-full font-medium text-sm border transition-colors ${
+						cat === category
+							? "bg-brand-primary text-white border-brand-primary"
+							: "bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700"
+					}`}
+				>
+					{cat}
+				</a>
+			))
+		}
+	</div>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-		{prompts.map((prompt) => (
-			<PromptCard prompt={prompt} />
-		))}
+		{prompts.map((prompt) => <PromptCard prompt={prompt} />)}
 	</div>
 </Layout>

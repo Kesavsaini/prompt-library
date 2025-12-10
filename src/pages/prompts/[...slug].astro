@@ -1,9 +1,9 @@
 ---
-import { getCollection, render } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
 
 export async function getStaticPaths() {
-	const prompts = await getCollection('prompts');
+	const prompts = await getCollection("prompts");
 	return prompts.map((prompt) => ({
 		params: { slug: prompt.id },
 		props: { prompt },
@@ -16,33 +16,56 @@ const { Content } = await render(prompt);
 
 <Layout title={prompt.data.title} description={prompt.data.description}>
 	<div class="max-w-4xl mx-auto">
-		<a href="/prompts" class="inline-flex items-center text-sm text-slate-400 hover:text-brand-primary mb-8 transition-colors">
-			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+		<a
+			href="/prompt-library/prompts"
+			class="inline-flex items-center text-sm text-slate-400 hover:text-brand-primary mb-8 transition-colors"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4 mr-2"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
 			</svg>
 			Back to Prompts
 		</a>
 
 		<article>
 			<div class="mb-10 text-center">
-				<span class="px-3 py-1 text-sm font-semibold rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20 mb-4 inline-block">
+				<span
+					class="px-3 py-1 text-sm font-semibold rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20 mb-4 inline-block"
+				>
 					{prompt.data.category}
 				</span>
-				<h1 class="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary">
+				<h1
+					class="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary"
+				>
 					{prompt.data.title}
 				</h1>
 				<p class="text-xl text-slate-300 max-w-2xl mx-auto">
 					{prompt.data.description}
 				</p>
 
-                <div class="flex flex-wrap justify-center gap-2 mt-6">
-                    {prompt.data.tags.map(tag => (
-                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">#{tag}</span>
-                    ))}
-                </div>
+				<div class="flex flex-wrap justify-center gap-2 mt-6">
+					{
+						prompt.data.tags.map((tag) => (
+							<span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">
+								#{tag}
+							</span>
+						))
+					}
+				</div>
 			</div>
 
-			<div class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800">
+			<div
+				class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800"
+			>
 				<Content />
 			</div>
 		</article>

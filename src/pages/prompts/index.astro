@@ -1,36 +1,46 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
-import PromptCard from '../../components/PromptCard.astro';
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import PromptCard from "../../components/PromptCard.astro";
 
-const prompts = (await getCollection('prompts')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+const prompts = (await getCollection("prompts")).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const allCategories = [...new Set(prompts.map((p) => p.data.category))];
 ---
 
-<Layout title="All Prompts" description="Browse our collection of high-quality prompts.">
+<Layout
+	title="All Prompts"
+	description="Browse our collection of high-quality prompts."
+>
 	<div class="mb-12 text-center">
 		<h1 class="text-4xl md:text-5xl font-bold mb-4">Prompt Library</h1>
 		<p class="text-xl text-slate-400 max-w-2xl mx-auto">
-			Explore our curated collection of prompts for coding, writing, and productivity.
+			Explore our curated collection of prompts for coding, writing, and
+			productivity.
 		</p>
 	</div>
 
-    {/* Functional Category Filter Links */}
-    <div class="flex justify-center flex-wrap gap-4 mb-12">
-        <a href="/prompts" class="px-4 py-2 rounded-full bg-brand-primary text-white font-medium text-sm border border-brand-primary">All</a>
-        {allCategories.map(cat => (
-            <a href={`/prompts/${cat.toLowerCase()}`} class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-medium text-sm border border-slate-700 hover:bg-slate-700 transition-colors">
-                {cat}
-            </a>
-        ))}
-    </div>
+	<div class="flex justify-center flex-wrap gap-4 mb-12">
+		<a
+			href="/prompt-library/prompts"
+			class="px-4 py-2 rounded-full bg-brand-primary text-white font-medium text-sm border border-brand-primary"
+			>All</a
+		>
+		{
+			allCategories.map((cat) => (
+				<a
+					href={`/prompt-library/prompts/${cat.toLowerCase()}`}
+					class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-medium text-sm border border-slate-700 hover:bg-slate-700 transition-colors"
+				>
+					{cat}
+				</a>
+			))
+		}
+	</div>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-		{prompts.map((prompt) => (
-			<PromptCard prompt={prompt} />
-		))}
+		{prompts.map((prompt) => <PromptCard prompt={prompt} />)}
 	</div>
 </Layout>
