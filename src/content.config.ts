@@ -16,4 +16,15 @@ const blog = defineCollection({
 		}),
 });
 
-export const collections = { blog };
+const prompts = defineCollection({
+	loader: glob({ base: './src/content/prompts', pattern: '**/*.{md,mdx}' }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		category: z.enum(['Coding', 'Writing', 'Productivity', 'Other']),
+		tags: z.array(z.string()).default([]),
+		pubDate: z.coerce.date(),
+	}),
+});
+
+export const collections = { blog, prompts };

@@ -1,0 +1,42 @@
+---
+title: 'Fixing Bugs with Shadcn UI'
+description: 'A prompt to help debug issues when using Shadcn UI components in React projects.'
+pubDate: 2023-10-20
+category: 'Coding'
+tags: ['react', 'shadcn', 'debugging', 'css']
+---
+
+# Context
+You are an expert React developer familiar with Tailwind CSS and Radix UI primitives.
+
+# Task
+Help me debug an issue where the `Select` component from Shadcn UI is not displaying the selected value correctly.
+
+# Code Snippet
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectDemo() {
+  return (
+    <Select>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Theme" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="light">Light</SelectItem>
+        <SelectItem value="dark">Dark</SelectItem>
+        <SelectItem value="system">System</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+# Issue
+The dropdown works, but selecting an item doesn't update the trigger text.

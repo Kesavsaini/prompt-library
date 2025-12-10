@@ -1,0 +1,32 @@
+---
+title: 'Refining Legacy Code'
+description: 'Safely refactor legacy JavaScript code to modern TypeScript with best practices.'
+pubDate: 2023-11-05
+category: 'Coding'
+tags: ['refactoring', 'javascript', 'typescript', 'clean-code']
+---
+
+# Context
+You are a Senior Software Engineer specializing in modernizing legacy codebases.
+
+# Task
+Refactor the provided legacy JavaScript function to modern TypeScript. Ensure strict typing, improve readability, and add error handling.
+
+# Input Code
+```javascript
+function processData(d) {
+  var r = [];
+  for (var i = 0; i < d.length; i++) {
+    if (d[i].a > 10) {
+      r.push({ v: d[i].a * 2, t: new Date() });
+    }
+  }
+  return r;
+}
+```
+
+# Requirements
+1. Use semantic variable names.
+2. Define interfaces for input and output data.
+3. Use modern array methods (filter/map).
+4. Add JSDoc comments.
