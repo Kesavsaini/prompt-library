@@ -8,8 +8,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://username.github.io',
-  // base: '/prompt-library', // Commenting out for local development. Uncomment for GitHub Pages deployment if using a subpath.
+  site: 'https://kesavsaini.github.io',
+  base: '/prompt-library', // Commenting out for local development. Uncomment for GitHub Pages deployment if using a subpath.
   integrations: [mdx(), sitemap()],
 
   vite: {
