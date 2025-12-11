@@ -20,13 +20,13 @@ const { prompt } = Astro.props;
 		<div class="relative z-10 flex flex-col h-full">
 			<div class="flex justify-between items-start mb-4">
 				<span
-					class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-800 text-brand-secondary border border-slate-700"
+					class="px-3 py-1 text-xs font-semibold rounded-full bg-secondary text-secondary-foreground border border-border"
 				>
 					{prompt.data.category}
 				</span>
 				<time
 					datetime={prompt.data.pubDate.toISOString()}
-					class="text-xs text-slate-500"
+					class="text-xs text-muted-foreground"
 				>
 					{
 						prompt.data.pubDate.toLocaleDateString("en-us", {
@@ -39,19 +39,21 @@ const { prompt } = Astro.props;
 			</div>
 
 			<h3
-				class="text-xl font-bold mb-3 text-slate-100 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-primary group-hover:to-brand-secondary transition-all"
+				class="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors"
 			>
 				{prompt.data.title}
 			</h3>
 
-			<p class="text-slate-400 text-sm mb-6 flex-grow line-clamp-3">
+			<p
+				class="text-muted-foreground text-sm mb-6 flex-grow line-clamp-3"
+			>
 				{prompt.data.description}
 			</p>
 
 			<div class="flex flex-wrap gap-2 mt-auto">
 				{
 					prompt.data.tags.map((tag) => (
-						<span class="text-xs px-2 py-1 rounded-md bg-slate-800/50 text-slate-400 border border-slate-700/50">
+						<span class="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground border border-border">
 							#{tag}
 						</span>
 					))

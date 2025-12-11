@@ -18,7 +18,7 @@ const { Content } = await render(prompt);
 	<div class="max-w-4xl mx-auto">
 		<a
 			href="/prompt-library/prompts"
-			class="inline-flex items-center text-sm text-slate-400 hover:text-brand-primary mb-8 transition-colors"
+			class="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -39,23 +39,21 @@ const { Content } = await render(prompt);
 		<article>
 			<div class="mb-10 text-center">
 				<span
-					class="px-3 py-1 text-sm font-semibold rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20 mb-4 inline-block"
+					class="px-3 py-1 text-sm font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 mb-4 inline-block"
 				>
 					{prompt.data.category}
 				</span>
-				<h1
-					class="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary"
-				>
+				<h1 class="text-4xl md:text-5xl font-bold mb-6 text-foreground">
 					{prompt.data.title}
 				</h1>
-				<p class="text-xl text-slate-300 max-w-2xl mx-auto">
+				<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
 					{prompt.data.description}
 				</p>
 
 				<div class="flex flex-wrap justify-center gap-2 mt-6">
 					{
 						prompt.data.tags.map((tag) => (
-							<span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">
+							<span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
 								#{tag}
 							</span>
 						))
@@ -64,7 +62,7 @@ const { Content } = await render(prompt);
 			</div>
 
 			<div
-				class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800"
+				class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-card prose-pre:border prose-pre:border-border"
 			>
 				<Content />
 			</div>

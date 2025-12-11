@@ -5,22 +5,31 @@ import PromptCard from "../../components/PromptCard.astro";
 
 export async function getStaticPaths() {
 	const prompts = await getCollection("prompts");
-	const uniqueCategories = [...new Set(prompts.map((p) => p.data.category))];
+	const paths = new Set<string>();
 
-	return uniqueCategories.map((category) => {
-		const filteredPrompts = prompts.filter(
-			(p) => p.data.category === category,
+	prompts.forEach((p) => {
+		const segments = p.id.split("/");
+		segments.pop(); // Remove filename
+		let currentPath = "";
+		segments.forEach((segment) => {
+			currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+			paths.add(currentPath);
+		});
+	});
+
+	return Array.from(paths).map((category) => {
+		const categoryPath = category + "/";
+		const filteredPrompts = prompts.filter((p) =>
+			p.id.startsWith(categoryPath),
 		);
 		return {
-			params: { category: category.toLowerCase() },
+			params: { category },
 			props: { category, prompts: filteredPrompts },
 		};
 	});
 }
 
 const { category, prompts } = Astro.props;
-const allPrompts = await getCollection("prompts");
-const allCategories = [...new Set(allPrompts.map((p) => p.data.category))];
 
 // Sort by date descending
 prompts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -35,29 +44,6 @@ prompts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 		<p class="text-xl text-slate-400 max-w-2xl mx-auto">
 			Browse our curated selection of prompts for {category}.
 		</p>
-	</div>
-
-	<div class="flex justify-center flex-wrap gap-4 mb-12">
-		<a
-			href="/prompt-library/prompts"
-			class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-medium text-sm border border-slate-700 hover:bg-slate-700 transition-colors"
-		>
-			All
-		</a>
-		{
-			allCategories.map((cat) => (
-				<a
-					href={`/prompt-library/prompts/${cat.toLowerCase()}`}
-					class={`px-4 py-2 rounded-full font-medium text-sm border transition-colors ${
-						cat === category
-							? "bg-brand-primary text-white border-brand-primary"
-							: "bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700"
-					}`}
-				>
-					{cat}
-				</a>
-			))
-		}
 	</div>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
