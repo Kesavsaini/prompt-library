@@ -1,0 +1,40 @@
+---
+import PromptCard from "./PromptCard.astro";
+
+// --- Assuming these Astro components exist and are imported ---
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+// -----------------------------------------------------------
+
+interface Props {
+    title: string;
+    href?: string;
+    // Using any[] for now as CollectionEntry<'prompts'> might be complex to import
+    prompts: any[];
+}
+
+const { title, href, prompts } = Astro.props;
+---
+
+<Card className="bg-background backdrop-blur-sm border-white/10">
+    <CardHeader className="flex flex-row items-center justify-between border-b-2 pb-4">
+        <CardTitle className="text-2xl">{title}</CardTitle>
+        <div>
+        {
+            href && (
+                <a
+                    href={href}
+                    class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                >
+                    See All
+                </a>
+            )
+        }
+        </div>
+    </CardHeader>
+
+    <CardContent className="p-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {prompts.slice(0, 3).map((prompt) => <PromptCard prompt={prompt} />)}
+        </div>
+    </CardContent>
+</Card>

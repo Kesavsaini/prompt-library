@@ -1,71 +1,179 @@
 ---
 import { getCollection, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import PromptCard from "../../components/PromptCard.astro";
+import PromptGroup from "../../components/PromptGroup.astro";
+import { Badge } from "@/components/ui/badge";
+import { toTitleCase } from "../../lib/utils";
 
 export async function getStaticPaths() {
 	const prompts = await getCollection("prompts");
-	return prompts.map((prompt) => ({
-		params: { slug: prompt.id },
-		props: { prompt },
-	}));
+	const paths = [];
+
+	// 1. Prompt Paths
+	prompts.forEach((p) => {
+		paths.push({
+			params: { slug: p.id },
+			props: { type: "prompt", data: p },
+		});
+	});
+
+	// 2. Category Paths
+	const categories = new Set<string>();
+	prompts.forEach((p) => {
+		const segments = p.id.split("/");
+		segments.pop(); // remove file
+		let currentPath = "";
+		segments.forEach((segment) => {
+			currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+			categories.add(currentPath);
+		});
+	});
+
+	categories.forEach((cat) => {
+		const catPath = cat + "/";
+		// Filter prompts that belong to this category (including subcategories)
+		const catPrompts = prompts.filter((p) => p.id.startsWith(catPath));
+		
+		paths.push({
+			params: { slug: cat },
+			props: {
+				type: "category",
+				data: { category: cat, prompts: catPrompts },
+			},
+		});
+	});
+
+	return paths;
 }
 
-const { prompt } = Astro.props;
-const { Content } = await render(prompt);
+const { type, data } = Astro.props;
+let Content;
+if (type === "prompt") {
+	const rendered = await render(data);
+	Content = rendered.Content;
+}
+
+// Category Logic
+let subcategories: Record<string, typeof data.prompts> = {};
+let rootPrompts: typeof data.prompts = [];
+let hasSubcategories = false;
+
+if (type === "category") {
+	const { category, prompts } = data;
+	prompts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+	prompts.forEach((p) => {
+		const relativePath = p.id.startsWith(category.toLowerCase() + "/")
+			? p.id.slice(category.length + 1)
+			: p.id;
+
+		const parts = relativePath.split("/");
+		if (parts.length > 1) {
+			const subcat = parts[0];
+			if (!subcategories[subcat]) {
+				subcategories[subcat] = [];
+			}
+			subcategories[subcat].push(p);
+		} else {
+			rootPrompts.push(p);
+		}
+	});
+	hasSubcategories = Object.keys(subcategories).length > 0;
+}
 ---
 
-<Layout title={prompt.data.title} description={prompt.data.description}>
-	<div class="max-w-4xl mx-auto">
-		<a
-			href="/prompt-library/prompts"
-			class="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
+{
+	type === "prompt" ? (
+		<Layout
+			title={data.data.title}
+			description={data.data.description}
 		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-4 w-4 mr-2"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-			</svg>
-			Back to Prompts
-		</a>
-
-		<article>
-			<div class="mb-10 text-center">
-				<span
-					class="px-3 py-1 text-sm font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 mb-4 inline-block"
+			<div class="max-w-4xl mx-auto">
+				<a
+					href="/prompt-library/prompts"
+					class="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
 				>
-					{prompt.data.category}
-				</span>
-				<h1 class="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-					{prompt.data.title}
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4 mr-2"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 19l-7-7m0 0l7-7m-7 7h18"
+						/>
+					</svg>
+					Back to Prompts
+				</a>
+
+				<article>
+					<div class="mb-10 text-center">
+						<Badge variant="secondary" className="mb-4">
+							{data.data.category}
+						</Badge>
+						<h1 class="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+							{data.data.title}
+						</h1>
+						<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+							{data.data.description}
+						</p>
+
+						<div class="flex flex-wrap justify-center gap-2 mt-6">
+							{data.data.tags.map((tag) => (
+								<span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
+									#{tag}
+								</span>
+							))}
+						</div>
+					</div>
+
+					<div class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-card prose-pre:border prose-pre:border-border">
+						<Content />
+					</div>
+				</article>
+			</div>
+		</Layout>
+	) : (
+		<Layout
+			title={`${toTitleCase(data.category)} Prompts`}
+			description={`Browse our collection of ${data.category} prompts.`}
+		>
+			<div class="mb-12 text-center">
+				<h1 class="text-4xl md:text-5xl font-bold mb-4">
+					{toTitleCase(data.category)} Prompts
 				</h1>
-				<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
-					{prompt.data.description}
+				<p class="text-xl text-slate-400 max-w-2xl mx-auto">
+					Browse our curated selection of prompts for {data.category}.
 				</p>
-
-				<div class="flex flex-wrap justify-center gap-2 mt-6">
-					{
-						prompt.data.tags.map((tag) => (
-							<span class="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
-								#{tag}
-							</span>
-						))
-					}
-				</div>
 			</div>
 
-			<div
-				class="glass-card rounded-2xl p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-card prose-pre:border prose-pre:border-border"
-			>
-				<Content />
+			<div class="space-y-12">
+				{hasSubcategories ? (
+					<>
+						{Object.entries(subcategories).map(([subcat, subPrompts]) => (
+							<PromptGroup
+								title={toTitleCase(subcat)}
+								href={`/prompt-library/prompts/${data.category.toLowerCase()}/${subcat}`}
+								prompts={subPrompts as any[]}
+							/>
+						))}
+						{rootPrompts.length > 0 && (
+							<PromptGroup title="Other" prompts={rootPrompts as any[]} />
+						)}
+					</>
+				) : (
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{data.prompts.map((prompt) => (
+							<PromptCard prompt={prompt} />
+						))}
+					</div>
+				)}
 			</div>
-		</article>
-	</div>
-</Layout>
+		</Layout>
+	)
+}

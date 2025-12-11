@@ -2,12 +2,21 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import PromptCard from "../../components/PromptCard.astro";
+import PromptGroup from "../../components/PromptGroup.astro";
 
 const prompts = (await getCollection("prompts")).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const allCategories = [...new Set(prompts.map((p) => p.data.category))];
+
+const groupedPrompts = allCategories.reduce(
+	(acc, category) => {
+		acc[category] = prompts.filter((p) => p.data.category === category);
+		return acc;
+	},
+	{} as Record<string, typeof prompts>,
+);
 ---
 
 <Layout
@@ -22,7 +31,15 @@ const allCategories = [...new Set(prompts.map((p) => p.data.category))];
 		</p>
 	</div>
 
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-		{prompts.map((prompt) => <PromptCard prompt={prompt} />)}
+	<div class="space-y-12">
+		{
+			allCategories.map((category) => (
+				<PromptGroup
+					title={category}
+					href={`/prompt-library/prompts/${category.toLowerCase()}`}
+					prompts={groupedPrompts[category]}
+				/>
+			))
+		}
 	</div>
 </Layout>
