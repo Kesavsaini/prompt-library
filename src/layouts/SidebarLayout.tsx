@@ -6,7 +6,7 @@ export default function SidebarLayout({ children, prompts }: { children: React.R
         <SidebarProvider>
             <AppSidebar prompts={prompts} />
             <main>
-                <SidebarTrigger />
+                <SidebarTrigger className="md:hidden" />
                 {children}
             </main>
         </SidebarProvider>

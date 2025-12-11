@@ -121,6 +121,13 @@ export function AppSidebar({ prompts }: { prompts: Prompt[] }) {
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <a href="/prompt-library/prompts">
+                                <span>All Prompts</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
