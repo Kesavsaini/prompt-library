@@ -24,6 +24,7 @@ import {
 	CardDescription,
 } from "@/components/ui/card"; // NEW: For prompt content
 import { cn, toTitleCase } from "../../lib/utils"; // Assuming utils contains cn and toTitleCase
+import { CopyButton } from "@/components/CopyButton";
 
 // ------------------------------------------------------------------
 // DATA FETCHING & PATH GENERATION
@@ -173,7 +174,14 @@ if (type === "category") {
 					</Card>
 
 					{/* Content Section (Wrapped in Card for structure) */}
-					<Card className="glass-card rounded-2xl">
+					<Card className="rounded-2xl relative bg-background">
+						<div class="absolute top-4 right-4 z-10">
+							<CopyButton
+								value={data.body}
+								client:load
+								className="bg-muted hover:bg-background"
+							/>
+						</div>
 						<CardContent className="p-8 md:p-12 prose prose-invert prose-lg max-w-none prose-pre:bg-secondary prose-pre:text-secondary-foreground prose-pre:border prose-pre:border-border">
 							<Content />
 						</CardContent>
