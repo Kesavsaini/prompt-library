@@ -32,7 +32,7 @@ interface CategoryNode {
     children: Record<string, CategoryNode>;
 }
 
-export function AppSidebar({ prompts }: { prompts: Prompt[] }) {
+export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname: string }) {
     // Build tree from prompt IDs
     const tree: Record<string, CategoryNode> = {};
 
@@ -62,6 +62,73 @@ export function AppSidebar({ prompts }: { prompts: Prompt[] }) {
         });
     }
 
+    // Helper to extract active paths from current pathname
+    const getActivePaths = (path: string) => {
+        const prefix = "/prompt-library/prompts/";
+        const active: Record<string, boolean> = {};
+        if (path && path.startsWith(prefix)) {
+            const parts = path.slice(prefix.length).split('/');
+            let current = "";
+            parts.forEach((part) => {
+                if (!part) return;
+                current = current ? `${current}/${part}` : part;
+                active[current] = true;
+            });
+        }
+        return active;
+    };
+
+    // Initialize state with active paths (SSR friendly) + localStorage (Client)
+    const [openStates, setOpenStates] = React.useState<Record<string, boolean>>(() => {
+        const active = getActivePaths(pathname);
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem("sidebar-state");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Merge saved state with active state. 
+                    // Active state takes precedence for "ensure open", but we keep other saved opens.
+                    return { ...parsed, ...active };
+                } catch (e) {
+                    console.error("Failed to parse sidebar state", e);
+                }
+            }
+        }
+        return active;
+    });
+
+    // Update state when pathname changes (for client-side navigation)
+    React.useEffect(() => {
+        setOpenStates(prev => {
+            const newActive = getActivePaths(pathname);
+            // Only update if there are new active paths that aren't open
+            const next = { ...prev };
+            let changed = false;
+            Object.keys(newActive).forEach(key => {
+                if (!next[key]) {
+                    next[key] = true;
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                // We typically don't persist "auto-opened" things to localStorage immediately
+                // to avoid polluting user prefs, but for simplicity/consistency we can.
+                // Or just update local state.
+                return next;
+            }
+            return prev;
+        });
+    }, [pathname]);
+
+    const handleOpenChange = (path: string, isOpen: boolean) => {
+        setOpenStates(prev => {
+            const next = { ...prev, [path]: isOpen };
+            localStorage.setItem("sidebar-state", JSON.stringify(next));
+            return next;
+        });
+    };
+
     const renderTree = (nodes: Record<string, CategoryNode>, depth = 0) => {
         const sortedNodes = Object.values(nodes).sort((a, b) => a.name.localeCompare(b.name));
         return sortedNodes.map((node) => {
@@ -70,7 +137,13 @@ export function AppSidebar({ prompts }: { prompts: Prompt[] }) {
 
             if (depth === 0) {
                 return (
-                    <Collapsible key={node.path} asChild defaultOpen={false} className="group/collapsible">
+                    <Collapsible
+                        key={node.path}
+                        asChild
+                        open={!!openStates[node.path]}
+                        onOpenChange={(isOpen) => handleOpenChange(node.path, isOpen)}
+                        className="group/collapsible"
+                    >
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild tooltip={node.name}>
                                 <a href={href}>

@@ -8,14 +8,24 @@ interface Props {
 }
 const { title, description } = Astro.props;
 import { getCollection } from "astro:content";
+import { ClientRouter } from "astro:transitions";
 const prompts = await getCollection("prompts");
 ---
 
 <!doctype html>
 <html lang="en">
-	<head> <BaseHead title={title} description={description} /> </head>
-	<body class="bg-background text-foreground antialiased min-h-screen flex p-12">
-		<SidebarLayout client:load prompts={prompts}>
+	<head>
+		<BaseHead title={title} description={description} />
+		<ClientRouter />
+	</head>
+	<body
+		class="bg-background text-foreground antialiased min-h-screen flex p-12"
+	>
+		<SidebarLayout
+			client:load
+			prompts={prompts}
+			pathname={Astro.url.pathname}
+		>
 			<slot />
 		</SidebarLayout>
 	</body>
