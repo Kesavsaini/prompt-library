@@ -1,0 +1,117 @@
+name: Process Prompt Submission
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  create-prompt:
+    if: contains(github.event.issue.labels.*.name, 'prompt-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Parse Issue Body
+        id: parse
+        uses: zwoo-hq/github-action-yaml-parse@v1.0.0
+        with:
+          content: ${{ github.event.issue.body }}
+          
+      # Using a custom script to parse if the action above is insufficient or for more control
+      # But let's try a direct approach with actions/github-script for robust parsing of the specific format if needed.
+      # Actually, the Issue Form submits as proper YAML in the body? No, it submits as Markdown.
+      # The previous action expects YAML. Issue forms body is markdown with headers.
+      # We need a dedicated parser for Issue Forms.
+      
+      - name: Parse Issue Form
+        id: issue-parser
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body;
+            
+            // Helper to extract value between headers
+            function extractValue(header) {
+              const regex = new RegExp(`### ${header}\\s+([\\s\\S]*?)(?=(?:###|$))`, 'i');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+            
+            const title = extractValue('Prompt Title');
+            const description = extractValue('Description');
+            const category = extractValue('Category');
+            const subcategory = extractValue('Subcategory \\(Optional\\)');
+            const tags = extractValue('Tags');
+            const content = extractValue('Prompt Content');
+            
+            // Output variables
+            core.setOutput('title', title);
+            core.setOutput('description', description);
+            core.setOutput('category', category.toLowerCase());
+            core.setOutput('subcategory', subcategory ? subcategory.toLowerCase() : '');
+            core.setOutput('tags', tags);
+            core.setOutput('content', content);
+
+      - name: Generate File Path and Content
+        id: generate
+        run: |
+          TITLE="${{ steps.issue-parser.outputs.title }}"
+          DESC="${{ steps.issue-parser.outputs.description }}"
+          CAT="${{ steps.issue-parser.outputs.category }}"
+          SUBCAT="${{ steps.issue-parser.outputs.subcategory }}"
+          TAGS="${{ steps.issue-parser.outputs.tags }}"
+          CONTENT="${{ steps.issue-parser.outputs.content }}"
+          
+          # Slugify title
+          SLUG=$(echo "$TITLE" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr A-Z a-z)
+          
+          # Construct Path
+          if [ -z "$SUBCAT" ]; then
+             DIR="src/content/prompts/$CAT"
+          else
+             DIR="src/content/prompts/$CAT/$SUBCAT"
+          fi
+          
+          FILENAME="$DIR/$SLUG.mdx"
+          
+          echo "Creating directory: $DIR"
+          mkdir -p "$DIR"
+          
+          # Create file content
+          # We need to handle multi-line content carefully for the EOF
+          
+          cat <<EOF > "$FILENAME"
+          ---
+          title: '$TITLE'
+          description: '$DESC'
+          pubDate: $(date +%Y-%m-%d)
+          category: '$CAT'
+          tags: [$(echo $TAGS | sed "s/,/','/g" | sed "s/^/'/" | sed "s/$/'/")]
+          ---
+
+          $CONTENT
+          EOF
+          
+          echo "Created $FILENAME"
+          cat "$FILENAME"
+          
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat: add NEW prompt '$SLUG'"
+          title: "feat: add prompt ${{ steps.issue-parser.outputs.title }}"
+          body: |
+            This PR adds the prompt "${{ steps.issue-parser.outputs.title }}" submitted via Issue #${{ github.event.issue.number }}.
+            
+            Closes #${{ github.event.issue.number }}
+          branch: "prompt/issue-${{ github.event.issue.number }}"
+          base: main

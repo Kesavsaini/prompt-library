@@ -213,7 +213,21 @@ export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname:
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter />
-        </Sidebar>
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <a
+                                href="https://github.com/Kesavsaini/prompt-library/issues/new?template=prompt_submission.yml"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span className="font-semibold">Submit Prompt</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
+        </Sidebar >
     )
 }
