@@ -11,24 +11,14 @@ permissions:
 
 jobs:
   create-prompt:
-    if: contains(github.event.issue.labels.*.name, 'prompt-submission')
+    # Trigger if label exists OR title starts with [New Prompt] (backup for missing labels)
+    if: contains(github.event.issue.labels.*.name, 'prompt-submission') || startsWith(github.event.issue.title, '[New Prompt]:')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Parse Issue Body
-        id: parse
-        uses: zwoo-hq/github-action-yaml-parse@v1.0.0
-        with:
-          content: ${{ github.event.issue.body }}
-          
-      # Using a custom script to parse if the action above is insufficient or for more control
-      # But let's try a direct approach with actions/github-script for robust parsing of the specific format if needed.
-      # Actually, the Issue Form submits as proper YAML in the body? No, it submits as Markdown.
-      # The previous action expects YAML. Issue forms body is markdown with headers.
-      # We need a dedicated parser for Issue Forms.
       
+      # We use github-script to parse the Markdown body from the Issue Form
       - name: Parse Issue Form
         id: issue-parser
         uses: actions/github-script@v7
