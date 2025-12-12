@@ -28,6 +28,7 @@ body:
         - coding
         - productivity
         - writing
+        - marketing
         - other
     validations:
       required: true
