@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Code, Zap, PenTool, Folder, LayoutGrid, type LucideIcon } from "lucide-react"
 import {
     Collapsible,
     CollapsibleContent,
@@ -30,8 +30,15 @@ interface Prompt {
 interface CategoryNode {
     name: string;
     path: string;
+    icon?: LucideIcon;
     children: Record<string, CategoryNode>;
 }
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    coding: Code,
+    productivity: Zap,
+    writing: PenTool,
+};
 
 export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname: string }) {
     // Build tree from prompt IDs
@@ -52,9 +59,11 @@ export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname:
             parts.forEach((part) => {
                 currentPath = currentPath ? `${currentPath}/${part}` : part;
                 if (!currentLevel[part]) {
+                    const Icon = CATEGORY_ICONS[part.toLowerCase()] || Folder;
                     currentLevel[part] = {
                         name: part.charAt(0).toUpperCase() + part.slice(1),
                         path: currentPath,
+                        icon: Icon,
                         children: {}
                     };
                 }
@@ -148,6 +157,7 @@ export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname:
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild tooltip={node.name}>
                                 <a href={href}>
+                                    {node.icon && <node.icon />}
                                     <span>{node.name}</span>
                                 </a>
                             </SidebarMenuButton>
@@ -199,6 +209,7 @@ export function AppSidebar({ prompts, pathname }: { prompts: Prompt[]; pathname:
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <a href="/prompt-library/prompts">
+                                <LayoutGrid />
                                 <span>All Prompts</span>
                             </a>
                         </SidebarMenuButton>
